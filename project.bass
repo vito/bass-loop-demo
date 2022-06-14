@@ -1,0 +1,23 @@
+; memoize dependency resolution
+(def *memos* *dir*/bass.lock)
+
+(use (.git (linux/alpine/git))
+     (git:github/vito/bass-loop/ref/main/bass/github.bass))
+
+; a set of validations to run against a checkout of the repo
+(defn checks [src]
+  {:tests (tests src)})
+
+; a thunk that runs (no-op) tests
+(defn tests [src]
+  (from (linux/alpine)
+    ; print the current date, with a label to ensure it always runs
+    (with-label ($ date) :at (now 0))
+
+    ; run a super legit test suite
+    ($ echo "..........................................")
+    ($ echo "tests passed")))
+
+; called by bass-loop
+(defn github-hook [event client]
+  (github:check-hook event client git checks))
